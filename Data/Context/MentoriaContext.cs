@@ -1,4 +1,5 @@
-﻿using Domain.Models;
+﻿using Data.Mappings;
+using Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -22,7 +23,6 @@ namespace Data.Context
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<User>(new UserMap().Configure);
-
 
         }
     }
