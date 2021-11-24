@@ -16,6 +16,7 @@ namespace Data.Context
 
         }
         public DbSet<User> Users { get; set; }
+        public DbSet<Cliente> Clientes { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -23,6 +24,8 @@ namespace Data.Context
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<User>(new UserMap().Configure);
+
+            modelBuilder.Entity<Cliente>(new ClienteMap().Configure);
 
         }
     }
