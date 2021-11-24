@@ -1,6 +1,7 @@
 ﻿using Data.Repositories;
 using Domain.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
+using Service.Interfaces;
 using Service.Services;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ namespace CrossCutting.InjectionConfigure
             services.AddScoped(typeof(IBaseService<>), typeof(BaseService<>));
             services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
             services.AddScoped(typeof(IClienteRepository), typeof(ClienteRepository));
+            services.AddScoped(typeof(IClienteService), typeof(ClienteService));
 
         }
     }
