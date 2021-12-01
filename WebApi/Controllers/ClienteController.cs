@@ -1,12 +1,15 @@
 ﻿using Domain.Interfaces;
 using Domain.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Service.Interfaces;
 using Service.Validators;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace WebApi.Controllers
@@ -36,6 +39,48 @@ namespace WebApi.Controllers
 
             return Execute(() => _baseClientService.Add<ClienteValidator>(cliente).Id);
         }
+        
+        [HttpPost]
+        [Route("Upload")]
+        public async Task<string> SendUpload([FromForm] IFormFile arquivo)
+        {
+            if(arquivo.Length > 0)
+            {
+                try
+                {
+                    if (!Directory.Exists("C:\\images\\"))
+                    {
+                        Directory.CreateDirectory("C:\\images\\");
+                    }
+
+                    using (FileStream fileStream = System.IO.File.Create("C:\\images\\" + arquivo.FileName))
+                    {
+                        await arquivo.CopyToAsync(fileStream);
+                        fileStream.Flush();
+                        return "C:\\images\\" + arquivo.FileName;
+                    }
+                }
+                catch(Exception e){
+                    return e.ToString();
+                }
+            }
+            else
+            {
+                return "Arquivo com falha.....";
+            }
+        }
+
+        [HttpGet]
+        [Route("Download")]
+        public FileResult Download(string filename)
+        {
+            string path = Path.Combine("C:\\images\\") + filename;
+
+            byte[] bytes = System.IO.File.ReadAllBytes(path);
+
+            return File(bytes, "application/octet-stream", filename);
+        }
+
         [HttpPut]
         public IActionResult Update([FromBody] Cliente cliente)
         {
