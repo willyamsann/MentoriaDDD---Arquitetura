@@ -34,6 +34,7 @@ namespace WebApi.Controllers
         [Route("CreateCliente")]
         public IActionResult Create([FromBody] Cliente cliente)
         {
+
             if (cliente == null)
                 return NotFound();
 
@@ -41,11 +42,12 @@ namespace WebApi.Controllers
         }
         
         [HttpPost]
-        [Route("Upload")]
-        public async Task<string> SendUpload([FromForm] IFormFile arquivo)
+        [Route("Upload/{id}")]
+        public async Task<string> SendUpload([FromForm] IFormFile arquivo,int id)
         {
             if(arquivo.Length > 0)
             {
+
                 try
                 {
                     if (!Directory.Exists("C:\\images\\"))
@@ -57,6 +59,13 @@ namespace WebApi.Controllers
                     {
                         await arquivo.CopyToAsync(fileStream);
                         fileStream.Flush();
+
+                        var objCliente = _baseClientService.GetById(id);
+                        objCliente.Path = "C:\\images\\";
+                        objCliente.Type = "image/jpg";
+                        objCliente.PhotoName = arquivo.FileName;
+
+                        _baseClientService.Update<ClienteValidator>(objCliente);
                         return "C:\\images\\" + arquivo.FileName;
                     }
                 }
@@ -72,16 +81,16 @@ namespace WebApi.Controllers
 
         [HttpGet]
         [Route("Download")]
-        public FileResult Download(string filename)
+        public async Task<IActionResult> Download(string arquivo)
         {
-            string path = Path.Combine("C:\\images\\") + filename;
+            var path = "C:\\images\\";
+            var filepath = path + arquivo;
 
-            byte[] bytes = System.IO.File.ReadAllBytes(path);
-
-            return File(bytes, "application/octet-stream", filename);
+            var bytes = await System.IO.File.ReadAllBytesAsync(filepath);
+            return File(bytes, "image/png", Path.GetFileName(filepath));
         }
 
-        [HttpPut]
+            [HttpPut]
         public IActionResult Update([FromBody] Cliente cliente)
         {
             if (cliente == null)
@@ -133,6 +142,35 @@ namespace WebApi.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
+            }
+        }
+
+        private string UploadImage(IFormFile arquivo)
+        {
+            if (arquivo.Length > 0)
+            {
+                try
+                {
+                    if (!Directory.Exists("C:\\images\\"))
+                    {
+                        Directory.CreateDirectory("C:\\images\\");
+                    }
+
+                    using (FileStream fileStream = System.IO.File.Create("C:\\images\\" + arquivo.FileName))
+                    {
+                        arquivo.CopyTo(fileStream);
+                        fileStream.Flush();
+                        return "C:\\images\\" + arquivo.FileName;
+                    }
+                }
+                catch (Exception e)
+                {
+                    return e.ToString();
+                }
+            }
+            else
+            {
+                return "Arquivo com falha.....";
             }
         }
     }
